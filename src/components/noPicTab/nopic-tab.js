@@ -17,13 +17,13 @@ export default class NopicTab extends Component {
     }
 
   changPage(e){
-    var id = e.currentTarget.dataset.id
+    var id = this.props.orderList.id
     Taro.navigateTo({
       url: '../add/detail?id=' + `${id}`
   })
 }
 toPage(e){
-  var id = e.currentTarget.dataset.id
+  var id = this.props.orderList.id
   Taro.navigateTo({
     url: '../publish_two/publish_two?id=' + `${id}`
 })
@@ -65,7 +65,7 @@ componentWillMount () {
         <Image className={full?'pic':'none'} src='../../img/full.png'></Image>
         <View className='title'>{orderList.heading}</View>
         <View className='cont'>{orderList.content}</View>
-        <View className='time'>下单时间：{orderList.timeBuy}</View>
+        <View className='time'>下单时间：{new Date(parseInt(orderList.datetime)).toLocaleString().replace(/:\d{1,2}$/,' ')}</View>
         <View className='place'>地点：{orderList.location}</View>
         </View>
         <View className='button-box'>

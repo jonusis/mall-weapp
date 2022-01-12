@@ -20,8 +20,7 @@ export default class Index extends Component {
     navigationBarTitleText: '联系方式'
   }
   componentDidShow(){
-    Fetch('user/info/').then(data =>{
-      console.log(data.info)
+    Fetch(`user/info?uid=${Taro.getStorageSync('userInfo').uid}`).then(data =>{
       this.setState({
         tel: data.info.tel,
         qq: data.info.qq,
@@ -56,14 +55,17 @@ export default class Index extends Component {
         tel:this.state.tel,
         qq:this.state.qq,
         wechat:this.state.wechat,
+        uid:Taro.getStorageSync('userInfo').uid,
+        account:Taro.getStorageSync('userInfo').account,
+        headPicture:Taro.getStorageSync('userInfo').headPicture,
       },
       "PUT"
-    ).then(
+    ).then((res) => {
       Taro.navigateBack({
         delta:1,
-      url:`/pages/jinconnect/jinconnect/?tel=${this.state.tel}&qq=${this.state.qq}&wechat=${this.state.wechat}`
+      url:`/pages/jinconnect/jinconnect/?tel=${res.data.tel}&qq=${res.data.qq}&wechat=${res.data.wechat}`
     })
-    )
+    })
   }
   render () {
     const{ tel , qq , wechat }=this.state;

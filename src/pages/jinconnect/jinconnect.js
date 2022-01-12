@@ -18,14 +18,6 @@ export default class  Jconnection extends Component {
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
   componentWillMount(){
-      //this.setState({
-        // tel:this.$router.params.tel,
-        // qq:this.$router.params.qq,
-        // wechat:this.$router.params.wechat
-        // tel:Taro.getStorageSync('tel'),
-        // qq:Taro.getStorageSync('qq'),
-        // wechat:Taro.getStorageSync('wechat')
-      // })
       // Fetch(`user/info/`).then(data =>{
       //   console.log(data.info)
       //   this.setState({
@@ -60,15 +52,15 @@ export default class  Jconnection extends Component {
       //     }
       // })
   }
-  componentDidShow(){
-    Fetch('user/info/').then(data =>{
-      console.log(data.info)
-      this.setState({
-        tel: data.info.tel,
-        qq: data.info.qq,
-        wechat:data.info.wechat
+  componentDidMount(){
+      Fetch(`user/info?uid=${Taro.getStorageSync('userInfo').uid}`).then(data =>{
+        console.log(data.data)
+        this.setState({
+          tel: data.data.data.tel,
+          qq: data.data.data.qq,
+          wechat:data.data.data.wechat
+        })    
       })
-    })
   }
   Config = {
     navigationBarTitleText: "联系方式"
@@ -79,20 +71,21 @@ export default class  Jconnection extends Component {
       tel: '',
       qq: '',
       wechat:'',
+      isEditAll:false,
   }
 }
   changedisplay(){
-      Taro.navigateTo({
-          url:'/pages/connectiontwo/connectiontwo',
+      this.setState({
+        isEditAll: true,
       })
   }
   
 setconnection1(){
-    if((!isNull(this.state.tel))&&(this.state.tel!='')){
+    if(this.state.tel &&(this.state.tel!='')){
     Taro.setStorageSync('tel',this.state.tel)
     Taro.setStorageSync('con','已选电话')
     Taro.navigateBack({
-      url:'pages/index/login/login'
+      delta: 1
     })
    }
    else{
@@ -104,11 +97,11 @@ setconnection1(){
    }
   }
   setconnection2(){
-    if((!isNull(this.state.tel))&&(this.state.tel!='')){
+    if(this.state.wechat &&(this.state.wechat!='')){
     Taro.setStorageSync('wechat',this.state.wechat)
     Taro.setStorageSync('con','已选微信')
     Taro.navigateBack({
-      url:'pages/index/login/login'
+      delta: 1
     })
   }
   else{
@@ -120,11 +113,11 @@ setconnection1(){
   }
   }
   setconnection3(){
-    if((!isNull(this.state.tel))&&(this.state.tel!='')){
+    if(this.state.qq &&(this.state.qq!='')){
     Taro.setStorageSync('qq',this.state.qq)
     Taro.setStorageSync('con','已选qq')
     Taro.navigateBack({
-      url:'pages/index/login/login'
+      delta: 1
     })
   }
   else{
@@ -135,45 +128,86 @@ setconnection1(){
     })
   }
   }
+  changetel(e) {
+    this.setState({
+      tel: e.detail.value
+    });
+  }
+  changeqq(e) {
+    this.setState({
+      qq: e.detail.value
+    });
+  }
+  changewechat(e) {
+    this.setState({
+      wechat: e.detail.value
+    });
+  }
+  torefInfo(){
+    Fetch(
+      'user/info/',
+      {
+        tel:this.state.tel,
+        qq:this.state.qq,
+        wechat:this.state.wechat,
+        uid:Taro.getStorageSync('userInfo').uid,
+        account:Taro.getStorageSync('userInfo').account,
+        headPicture:Taro.getStorageSync('userInfo').headPicture,
+      },
+      "PUT"
+    ).then((res) => {
+      this.setState({
+        tel:res.data.data.tel,
+        qq:res.data.data.qq,
+        wechat:res.data.data.wechat,
+      })
+    })
+    this.setState({
+      isEditAll: false,
+    })
+  }
 
   render () {
-    const{ tel , qq , wechat }=this.state;
+    const{ tel , qq , wechat, isEditAll }=this.state;
     return (
       <View>
         <View className='btn'>
         <View className='box'></View>
-        <Button onClick={this.changedisplay}>编辑</Button>
+        {isEditAll ?  <Button onClick={this.torefInfo}>保存</Button> : <Button onClick={this.changedisplay}>编辑</Button> }
         </View>
         <View className='bigbox'>
           <View className='qqinput'>
           <Image className='photwo' src={photwo}></Image>
           <Input
-            disabled
+            disabled={!isEditAll}
             type='text'
             placeholder='请输入手机号'
             value={tel}
-            onClick={()=>this.setconnection1()}
+            onInput={this.changetel}
+            onClick={()=>!isEditAll && this.setconnection1()}
           >{this.state.tel}</Input>
           </View>
           <View className='qqinput'>
           <Image className='pho' src={phoone}></Image>
           
           <Input
-            disabled
+            disabled={!isEditAll}
             type='text'
             placeholder='快来完善微信号'
             value={wechat}
-            onClick={()=>this.setconnection2()}
+            onChange={this.changewechat}
+            onClick={()=>!isEditAll && this.setconnection2()}
           />
           </View>
           <View className='qqinput'>
           <Image className='pho' src={pho}></Image>
           <Input
-            disabled
+            disabled={!isEditAll}
             type='text'
             placeholder='请输入qq号'
             value={qq}
-            onClick={()=>this.setconnection3()}
+            onChange={this.changeqq}
+            onClick={()=>!isEditAll && this.setconnection3()}
           />
           </View>
         </View>

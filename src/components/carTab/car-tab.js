@@ -5,53 +5,52 @@ import '../../img/time.png'
 import '../../img/end.png'
 import '../../img/start.png'
 import '../../img/full.png'
-import Fetch1 from '../../common/request_1';
+import Fetch from '../../common/request';
 
 export default class CarTab extends Component {
 
   constructor(props){
     super(props)
     this.state = {
-      full:false
+      full:false,
+
       }
     }
     config = {
       navigationBarTitleText: '首页'
     }
 
-  changPage(e){
-    var id = e.currentTarget.dataset.id
-    Taro.navigateTo({
-      url: '../add/detail?id=' + `${id}`
-  })
-}
   toPostOrder(e){
-    var id = e.currentTarget.dataset.id;
-    Fetch1(
-      `order/car/?orderID=${id}`,
-      {
-        userID:Taro.getStorageSync('openid')
-      },
+    var id = this.props.orderList.id;
+    Fetch(
+      `order/car?ordercarID=${id}&userID=${Taro.getStorageSync('userInfo').uid}`,
+      {},
       "POST"
-    ).then(data =>{
-      var tel1 = data.way.tel;
-      var qq1 = data.way.qq;
-      var wechat1 = data.way.wecaht;
-      console.log(tel1,qq1,wechat1);
-      Taro.showModal({
-        title: "参与成功",
-        content:`联系方式：\r\n
-        qq：${qq1}\r\n
-        电话：${tel1}\r\n
-        微信：${wechat1}`
-      })
+    ).then(res =>{
+      if(res.data.code === 200){
+        var tel1 = res.data.tel;
+        var qq1 = res.data.qq;
+        var wechat1 = res.data.wecaht;
+        Taro.showModal({
+          title: "参与成功",
+          content:`联系方式：\r\n
+          qq：${qq1}\r\n
+          电话：${tel1}\r\n
+          微信：${wechat1}`
+        })
+      }else{
+        Taro.showModal({
+          title:res.data.msg,
+          duration:2000
+        })
+      }
     })
   }
   componentWillMount () {
     const {orderList}=this.props
     if(orderList.numExist == orderList.numNeed){
       this.setState({
-        full:true
+        full:true,
       })
     }
    }
@@ -79,7 +78,7 @@ export default class CarTab extends Component {
       <View className='numberOfpinpin'>已拼{orderList.numExist}/{orderList.numNeed} </View>
       </View>
         <View className='description'>
-        <Image className={full?'pic':'none'} src='../../img/full.png'></Image>
+        <Image className={orderList.full ?'pic':'none'} src='../../img/full.png'></Image>
         <View className='list'>
         <Image className='img' src='../../img/start.png'></Image>
         <View className='word'>{orderList.placeA}</View>
@@ -90,7 +89,7 @@ export default class CarTab extends Component {
         </View>
         <View className='list'>
         <Image className='img' src='../../img/time.png'></Image>
-        <View className='word'>{orderList.timeGo}</View>
+        <View className='word'>{orderList.time}</View>
         </View>
         </View>
         <View className='bottom'>

@@ -77,19 +77,13 @@ export default class Publish extends Component {
       //   this.setState({url:data.image_url})
       // })
       Taro.uploadFile({
-        url:'https://pinpin.muxixyz.com/api/v1/order/image/',
-        name:'image',
+        url:'http://10.189.1.135:8080/fileUpload/',
+        name:'file',
         filePath:tempFilePaths[0],
-        formData:{
-          image:tempFilePaths
-        },
-        header:{
-          token:Taro.getStorageSync('token')
-        },
         success:function(res){
           console.log(res)
           var ob=JSON.parse(res.data)
-          Taro.setStorageSync('image',ob.image_url)
+          Taro.setStorageSync('image','10.189.1.135:8080/' + ob.image_url)
         }
       })
       // this.setState({  url: res.image_url });
@@ -122,6 +116,7 @@ export default class Publish extends Component {
       Fetch(
         'order/post/buy/',
         {
+          postID:Taro.getStorageSync('userInfo').uid,
           kind:this.state.kind,
           heading:this.state.heading,
           content:this.state.content,

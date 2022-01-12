@@ -119,6 +119,7 @@ export default class Index extends Component {
     Fetch(
       'order/post/buy/',
       {
+        id:Taro.getStorageSync('userInfo').uid,
         kind:this.state.kind,
         heading:this.state.heading,
         content:this.state.content,

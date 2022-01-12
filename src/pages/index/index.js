@@ -1,9 +1,9 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View } from '@tarojs/components'
+import { Button, View } from '@tarojs/components'
 import './index.less'
 import Fetch from "../../common/request";
+import HeaderTab from '../../components/headerTab/header-tab';
 import SmallTab  from '../../components/smallTab-index/small-tab'
-import headerTab from '../../components/headerTab/header-tab'
 import NopicTab from '../../components/noPicTab-index/nopic-tab'
 import CarTab from '../../components/carTab/car-tab'
 
@@ -26,22 +26,21 @@ export default class mypage extends Component{
 
 
   getOrderCarList(page){
-    Fetch(`order/car/list/?page=${page}`).then(data => {
+    Fetch(`order/car/list/?page=${page}`).then(res => {
+      console.log(res);
       this.setState({
-        orderList:data.data.orderList,
-        hasNext:data.data.hasNext,
-        pageNum:data.data.pageNum
+        orderList:res.data.data,
+        hasNext:res.data.pageNum !== res.data.pageMaxSize,
+        pageNum:res.data.data.pageNum
       })
-      console.log(data);
     })
   }
   getOrderBuyList(index,page){
-    Fetch(`order/buy/list/?kind=${index}&page=${page}`).then(data => {
-      console.log(data);
+    Fetch(`order/buy/list/?kind=${index}&page=${page}`).then(res => {
       this.setState({
-        orderList:data.data.orderList,
-        hasNext:data.data.hasNext,
-        pageNum:data.data.pageNum
+        orderList:res.data.data,
+        hasNext:res.data.pageNum !== res.data.pageMaxSize,
+        pageNum:res.data.data.pageNum
       })
     })
   }
@@ -73,12 +72,12 @@ export default class mypage extends Component{
       var list = this.state.orderList;
       var num = this.state.pageNum;
       num = num + 1;
-      if(this.state.index !==2 ){
-      Fetch(`order/buy/list/?kind=${this.state.index}&page=${num}`).then(data => {
-        var datalist = data.data.orderList;
+      if(this.state.index !== 2){
+      Fetch(`order/buy/list/?kind=${this.state.index}&page=${num}`).then(res => {
+        var datalist = res.data.data;
         this.setState({
-          hasNext:data.data.hasNext,
-          pageNum:data.data.pageNum
+          hasNext:res.data.pageNum !== res.data.pageMaxSize,
+          pageNum:res.data.data.pageNum
         })
         return datalist;
       }).then(datalist =>{
@@ -89,9 +88,9 @@ export default class mypage extends Component{
       })
     }else{
       Fetch(`order/car/list/?page=${num}`).then(data => {
-        var datalist = data.data.orderList;
+        var datalist = res.data.data;
         this.setState({
-          hasNext:data.data.hasNext,
+          hasNext:res.data.pageNum !== res.data.pageMaxSize,
           pageNum:data.data.pageNum
         })
         return datalist;
@@ -106,17 +105,9 @@ export default class mypage extends Component{
   }
 
   componentWillMount() {
-    Fetch(
-      'user/info/',
-      {
-        username:Taro.getStorageSync('nickName'),
-        headPicture:Taro.getStorageSync('ava_p'),
-      },
-      "POST"
-    )
-    Fetch(`order/buy/list/?kind=1&page=1`).then(data => {
+    Fetch(`order/buy/list/?kind=1&page=1`).then(res => {
       this.setState({
-        orderList: data.data.orderList
+        orderList: res.data.data
       })
     })
   }
@@ -124,19 +115,19 @@ export default class mypage extends Component{
     const {index,orderList} = this.state;
     return (
       <View>
-        <headerTab navList={[{key:1,content:'网购'},{key:2,content:'拼车'},{key:3,content:'外卖'},{key:4,content:'会员账号'},{key:5,content:'其他'}]} onGetIndex={this.getIndex.bind(this)} />  
+        <HeaderTab navList={[{key:1,content:'网购'},{key:2,content:'拼车'},{key:3,content:'外卖'},{key:4,content:'会员账号'},{key:5,content:'其他'}]} onGetIndex={this.getIndex.bind(this)} />  
         <View className='height'>
         <View className='tab-content'>
         {index === 2?
           orderList.map((obj) => (
-            <CarTab key='2' orderList={obj} />
+            <CarTab orderList={obj}/>
         ))
         :
-        orderList.map((obj) => (
+        orderList.map((obj,index) => (
           obj.picture?
-            <SmallTab key='2' orderList={obj} />
+            <SmallTab orderList={obj} />
             :
-            <NopicTab key='2' orderList={obj} />
+            <NopicTab orderList={obj} />
         ))
         }
         </View>

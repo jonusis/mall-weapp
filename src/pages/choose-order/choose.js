@@ -3,6 +3,8 @@ import {View,Image,Button} from '@tarojs/components'
 import './choose.less'
 import  threeman from '../../img/three-people.png';
 import Fetch from "../../common/request";
+import {set as setGlobalData, get as getGlobalData} from '../../global_data';
+
 
 export default class Choose extends Component {
 
@@ -16,29 +18,38 @@ export default class Choose extends Component {
   Config = {
     navigationBarTitleText: '选择拼单'
   }
-
     toPageBuy(){
-      Taro.navigateTo({
-        url: `../publish/publish`
-    })
+      const hasLogin = getGlobalData('hasLogin');
+      if(hasLogin){
+        Taro.navigateTo({
+          url: `../publish/publish`
+        })
+      }else{
+        Taro.showToast({
+          title:'登陆后才能进行下面操作',
+          duration:2000
+        })
+        Taro.navigateTo({url:'/pages/person/login/login'})
+      }
+      
   }
     toPageCar(){
-      Taro.navigateTo({
-        url: `../addcar/addcar`
-    })
+      const hasLogin = getGlobalData('hasLogin');
+      if(hasLogin){
+        Taro.navigateTo({
+          url: `../addcar/addcar`
+        })
+      }else{
+        Taro.showToast({
+          title:'登陆后才能进行下面操作',
+          duration:2000
+        })
+        Taro.navigateTo({url:'/pages/person/login/login'})
+      }
   }
-  componentWillMount () {
-    Fetch(
-      'user/info/',
-      {
-        username:Taro.getStorageSync('nickName'),
-        headPicture:Taro.getStorageSync('ava_p'),
-      },
-      "POST"
-    )
-   }
+  componentWillMount () {}
 
-  componentDidMount () { }
+  componentDidMount () {}
 
   componentWillUnmount () { }
 

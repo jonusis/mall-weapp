@@ -1,5 +1,6 @@
 import Taro, { Component} from '@tarojs/taro'
 import { View,  OpenData} from '@tarojs/components'
+import { AtAvatar } from 'taro-ui'
 // import { AtButton ,Open-data} from 'taro-ui'
 import './person.less'
 import Fetch from "../../common/request";
@@ -7,6 +8,7 @@ import Connection from '../../components/connection/connection';
 import Myrecord from '../../components/myrecord/myrecord';
 import Toadvice from '../../components/toadvice/toadvice';
 import Share from '../../components/share/share';
+import {set as setGlobalData, get as getGlobalData} from '../../global_data';
 
 export default class Person extends Component {
 
@@ -17,10 +19,16 @@ export default class Person extends Component {
    * 对于像 navigationBarTextStyle: 'black' 这样的推导出的类型是 string
    * 提示和声明 navigationBarTextStyle: 'black' | 'white' 类型冲突, 需要显示声明类型
    */
+  constructor(){
+    this.state={
+      userInfo:{},
+      isLogin:false
+    }
+  }
   Config = {
     navigationBarTitleText: '我的'
   }
-
+  
   onShareAppMessage(){
     return{
       title:'校园拼拼',
@@ -28,38 +36,45 @@ export default class Person extends Component {
     }
   }
   componentWillMount () {
-    Fetch(
-      'user/info/',
-      {
-        username:Taro.getStorageSync('nickName'),
-        headPicture:Taro.getStorageSync('ava_p'),
-      },
-      "POST"
-    )
+
    }
 
-  componentDidMount () { }
+  componentDidMount () {
+    const hasLogin = getGlobalData('hasLogin');
+    if(hasLogin){
+      const data = Taro.getStorageSync('userInfo');
+      this.setState({userInfo:data,isLogin:true});
+    }else{
+      Taro.navigateTo({url: "/pages/person/login/login"});
+    }
+
+  }
 
   componentWillUnmount () { }
 
-  componentDidShow () { }
+  componentDidShow () {
+  }
 
   componentDidHide () { }
 
+  onLogin(){
+    Taro.navigateTo({url: "/pages/person/login/login"});
+  }
   
   render () {
+    const {userInfo,isLogin} = this.state;
     return (
       <View>
-      <View className='user'>
-      <OpenData className='avatar' type='userAvatarUrl'></OpenData>
-      <OpenData className='name' type='userNickName' lang='zh_CN'></OpenData>
-      </View>
-      <View className='choose-box'>
-      <Connection />
-      <Myrecord />
-      <Toadvice />
-      <Share />
-      </View>
+        <View className='user'>
+          {isLogin === false ? <View className="avatar" onClick={this.onLogin.bind(this)}></View> : <AtAvatar className="avatar" image={userInfo.headpicture}></AtAvatar>}
+          {isLogin  === false ? <View className="name" >请登录</View> : <View className="name">{userInfo.name}</View>}
+        </View>
+        <View className='choose-box'>
+        <Connection />
+        <Myrecord />
+        <Toadvice />
+        <Share />
+        </View>
       </View>
     )
   }

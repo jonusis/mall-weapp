@@ -3,12 +3,9 @@ import Taro from "@tarojs/taro";
 // amd cmd;模块发展的演变的过程；
 // promise就是一个表示未来的事情；
 
-const preHttp = "https://pinpin.muxixyz.com/api/v1/";
+const preHttp = "http://10.147.57.131:8080/";
 const Fetch = (url, data = {}, method = "GET") => {
   const header = { "content-type": "application/json"};
-
-  header.openid=Taro.getStorageSync('openid') ;
-  header.token=Taro.getStorageSync('token');
   return Taro.request({
     url: preHttp + url,
     data,
@@ -16,15 +13,11 @@ const Fetch = (url, data = {}, method = "GET") => {
     header
   }).then(res => {
     if (res.statusCode === 200) {
-      if (res.data) {
-        return res.data;
-      } else {
-        return res.data.code; // 业务逻辑错误，返回业务错误码
-      }
+      return res;
     } else {
       // 异常
       Taro.showToast({
-        title: ` ${res.data.msg}`,
+        title: ` ${res.data.message}`,
         icon: "none",
         duration: 1000
       });

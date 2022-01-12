@@ -17,13 +17,13 @@ export default class SmallTab extends Component {
     }
 
   changPage(e){
-    var id = e.currentTarget.dataset.id
+    var id = this.props.orderList.id
     Taro.navigateTo({
       url: '../add/detail?id=' + `${id}`
   })
 }
   toPage(e){
-    var id = e.currentTarget.dataset.id
+    var id = this.props.orderList.id
     Taro.navigateTo({
       url: '../publish_two/publish_two?id=' + `${id}`
   })
@@ -67,10 +67,10 @@ componentWillMount () {
       ></Image>
         <View className='description'>
         <View className='title'>{orderList.heading}</View>
-        <View className='time'>下单时间：{orderList.timeBuy}</View>
+        <View className='time'>下单时间：{new Date(parseInt(orderList.datetime)).toLocaleString().replace(/:\d{1,2}$/,' ')}</View>
         <View className='place'>地点：{orderList.location}</View>
         </View>
-        <Image className={full?'pic':'none'} src='../../img/full.png'></Image>
+        <Image className={orderList.full === 1?'pic':'none'} src='../../img/full.png'></Image>
         </View>
         <View className='button-box'>
         <View className='btn black' onClick={this.toPage.bind(this)} data-id={orderList.orderbuyID}>

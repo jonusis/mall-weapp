@@ -1,7 +1,6 @@
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component, startFacialRecognitionVerifyAndUploadVideo } from '@tarojs/taro'
 import { View,Image,Input,OpenData,Button } from '@tarojs/components'
 import './detail.less'
-import Fetch1 from "../../common/request_1";
 import Fetch from "../../common/request";
 import '../../img/timeicon.png'
 import '../../img/placeicon.png' 
@@ -84,17 +83,16 @@ export default class Detail extends Component {
   }
 }
 toPostOrder(){
-  Fetch1(
-    `order/buy/?orderID=${this.state.orderid}`,
-    {
-      userID:Taro.getStorageSync('openid')
-    },
+  Fetch(
+    `order/buy?orderbuyID=${this.state.orderid}&userID=${Taro.getStorageSync('userInfo').uid}`,
+    {},
     "POST"
-   ).then(data =>{
+   ).then(res =>{
+     if(res.data.code === 200){
      var num = 0;
-     var tel1 = data.way.tel;
-     var qq1 = data.way.qq;
-     var wechat1 = data.way.wecaht;
+     var tel1 = res.data.tel;
+     var qq1 = res.data.qq;
+     var wechat1 = res.data.wecaht;
      if(qq1!=''){
        num = 0;
      }else if(wechat1!=''){
@@ -102,8 +100,7 @@ toPostOrder(){
      }else if(tel1!=''){
        num = 2;
      }
-     console.log(tel1,qq1,wechat1);
-    Taro.showModal({
+      Taro.showModal({
       title: "参与成功",
       content:`联系方式：\n
       qq：${qq1}\n
@@ -127,18 +124,26 @@ toPostOrder(){
           })
         }
       }
+      this.onPullDownRefresh();
     }
-    }).then()
-  })
+    })
+  }else{
+    Taro.showModal({
+      title:res.data.msg,
+      icon:'failed',
+      duration:2000
+    })
+  }
+})
 }
     //刷新
     onPullDownRefresh(){
       const {orderid} = this.state
       Taro.showNavigationBarLoading();
-      Fetch(`order/buy/?orderID=${orderid}`).then(data =>{
+      Fetch(`order/buy/?orderID=${orderid}`).then(res =>{
         this.setState({
-          info:data.data.info,
-          comments:data.comments,
+          info:res.data.data,
+          comments:res.data.comments,
           })
       });
       Taro.hideNavigationBarLoading();
@@ -167,34 +172,14 @@ toPostOrder(){
       orderid:id,
     })
     Fetch(`order/buy/?orderID=${id}`
-    ).then(data =>{
-      var infoname = data.data.info.username;
-      console.log(infoname);
+    ).then(res =>{
       this.setState({
-      info:data.data.info,
-      comments:data.data.comments,
+      info:res.data.data,
+      comments:res.data.data.comments,
+      showButtonEdit: !res.data.data.full,
       })
-      var usrname = infoname;
-      var that = this;
-        Taro.getUserInfo({
-          success(res) {
-            var userInfo = res.userInfo;
-            var nickName = userInfo.nickName;
-            console.log(nickName,usrname);
-            if(usrname === nickName){
-              that.setState({
-                nickname:nickName,
-                showButtonCheek:true
-              })
-            }else{
-              that.setState({
-                showButtonEdit:true
-              })
-            }
-          }
-        })
-      })
-    }
+    })
+  }
 
   componentDidShow () {
    }
